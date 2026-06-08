@@ -1,0 +1,26 @@
+name: desktop_screen_recorder_windows
+description: Windows implementation for desktop_screen_recorder.
+version: 0.1.0
+publish_to: none
+
+environment:
+  sdk: ">=3.8.0 <4.0.0"
+  flutter: ">=3.32.0"
+
+dependencies:
+  flutter:
+    sdk: flutter
+  desktop_screen_recorder_platform_interface:
+    path: ../desktop_screen_recorder_platform_interface
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+
+flutter:
+  plugin:
+    implements: desktop_screen_recorder
+    platforms:
+      windows:
+        pluginClass: DesktopScreenRecorderWindowsPlugin
+        dartPluginClass: DesktopScreenRecorderWindows

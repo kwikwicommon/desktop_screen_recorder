@@ -1,0 +1,42 @@
+name: desktop_screen_recorder
+description: Federated desktop screen recording API for macOS and Windows.
+version: 0.1.0
+publish_to: none
+
+environment:
+  sdk: ">=3.8.0 <4.0.0"
+  flutter: ">=3.32.0"
+
+dependencies:
+  flutter:
+    sdk: flutter
+  get: ^4.7.3
+  path: ^1.9.1
+  path_provider: ^2.1.5
+  desktop_screen_recorder_platform_interface:
+    git:
+      url: https://github.com/kwikwicommon/desktop_screen_recorder.git
+      ref: main
+      path: desktop_screen_recorder_platform_interface
+  desktop_screen_recorder_macos:
+    git:
+      url: https://github.com/kwikwicommon/desktop_screen_recorder.git
+      ref: main
+      path: desktop_screen_recorder_macos
+  desktop_screen_recorder_windows:
+    git:
+      url: https://github.com/kwikwicommon/desktop_screen_recorder.git
+      ref: main
+      path: desktop_screen_recorder_windows
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+
+flutter:
+  plugin:
+    platforms:
+      macos:
+        default_package: desktop_screen_recorder_macos
+      windows:
+        default_package: desktop_screen_recorder_windows

@@ -1,0 +1,7 @@
+dependency_overrides:
+  desktop_screen_recorder_platform_interface:
+    path: /Users/chaoren/kwikwicommon/desktop_screen_recorder/desktop_screen_recorder_platform_interface
+  desktop_screen_recorder_macos:
+    path: /Users/chaoren/kwikwicommon/desktop_screen_recorder/desktop_screen_recorder_macos
+  desktop_screen_recorder_windows:
+    path: /Users/chaoren/kwikwicommon/desktop_screen_recorder/desktop_screen_recorder_windows
