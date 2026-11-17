@@ -61,10 +61,12 @@ class DesktopCleanupSnapshot {
           ? false
           : (hasDoNotDisturbState ?? this.hasDoNotDisturbState),
       ownerJobId: clearOwnership ? '' : (ownerJobId ?? this.ownerJobId),
-      ownerProcessId:
-          clearOwnership ? null : (ownerProcessId ?? this.ownerProcessId),
-      lockAcquiredAt:
-          clearOwnership ? null : (lockAcquiredAt ?? this.lockAcquiredAt),
+      ownerProcessId: clearOwnership
+          ? null
+          : (ownerProcessId ?? this.ownerProcessId),
+      lockAcquiredAt: clearOwnership
+          ? null
+          : (lockAcquiredAt ?? this.lockAcquiredAt),
       lastAuditAt: lastAuditAt ?? this.lastAuditAt,
     );
   }
@@ -96,9 +98,7 @@ class DesktopCleanupSnapshot {
       lockAcquiredAt: DateTime.tryParse(
         value['lockAcquiredAt'] as String? ?? '',
       ),
-      lastAuditAt: DateTime.tryParse(
-        value['lastAuditAt'] as String? ?? '',
-      ),
+      lastAuditAt: DateTime.tryParse(value['lastAuditAt'] as String? ?? ''),
     );
   }
 }
@@ -143,9 +143,7 @@ class DesktopCleanupController {
     }
 
     if (enableDoNotDisturb) {
-      final result = await _service.enableDoNotDisturbResult(
-        ownerJobId: jobId,
-      );
+      final result = await _service.enableDoNotDisturbResult(ownerJobId: jobId);
       if (result.isSuccess) {
         _dndApplied = true;
       } else {
@@ -515,9 +513,7 @@ class DesktopCleanupService {
     });
     final first = existing.length > 20 ? existing.length - 20 : 0;
     try {
-      await storage.save(_auditKey, {
-        'entries': existing.skip(first).toList(),
-      });
+      await storage.save(_auditKey, {'entries': existing.skip(first).toList()});
       await _saveSnapshot(audited);
     } catch (_) {}
   }

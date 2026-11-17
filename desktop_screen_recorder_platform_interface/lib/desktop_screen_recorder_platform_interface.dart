@@ -1,4 +1,4 @@
-library desktop_screen_recorder_platform_interface;
+library;
 
 export 'src/app_error.dart';
 export 'src/desktop_screen_recorder_platform.dart';

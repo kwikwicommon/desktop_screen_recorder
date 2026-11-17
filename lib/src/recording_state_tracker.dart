@@ -8,8 +8,7 @@ class RecordingStateTracker {
   Duration _pausedDuration = Duration.zero;
   DateTime? _pauseStartTime;
 
-  RecordingStateTracker({DateTimeProvider? now})
-      : now = now ?? DateTime.now;
+  RecordingStateTracker({DateTimeProvider? now}) : now = now ?? DateTime.now;
 
   bool get isRecording => _isRecording;
 

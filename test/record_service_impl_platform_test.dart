@@ -5,22 +5,25 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
-  test('record service delegates start pause resume and stop to platform', () async {
-    final platform = _FakePlatform();
-    final service = RecordServiceImpl(
-      platform: platform,
-      isSupportedPlatform: () => true,
-    );
+  test(
+    'record service delegates start pause resume and stop to platform',
+    () async {
+      final platform = _FakePlatform();
+      final service = RecordServiceImpl(
+        platform: platform,
+        isSupportedPlatform: () => true,
+      );
 
-    expect((await service.start(const RecordConfig())).isSuccess, isTrue);
-    expect((await service.pause()).isSuccess, isTrue);
-    expect((await service.resume()).isSuccess, isTrue);
-    final stopped = await service.stop();
+      expect((await service.start(const RecordConfig())).isSuccess, isTrue);
+      expect((await service.pause()).isSuccess, isTrue);
+      expect((await service.resume()).isSuccess, isTrue);
+      final stopped = await service.stop();
 
-    expect(stopped.isSuccess, isTrue);
-    expect(stopped.requireValue.filePath, '/tmp/recording.mp4');
-    expect(platform.calls, ['start', 'pause', 'resume', 'stop']);
-  });
+      expect(stopped.isSuccess, isTrue);
+      expect(stopped.requireValue.filePath, '/tmp/recording.mp4');
+      expect(platform.calls, ['start', 'pause', 'resume', 'stop']);
+    },
+  );
 
   test('record service rejects gif audio before platform call', () async {
     final platform = _FakePlatform();
@@ -131,10 +134,7 @@ class _FakePlatform extends DesktopScreenRecorderPlatform {
   final Completer<void> stopCalled = Completer<void>();
   final bool throwOnStart;
 
-  _FakePlatform({
-    this.startGate,
-    this.throwOnStart = false,
-  });
+  _FakePlatform({this.startGate, this.throwOnStart = false});
 
   @override
   Future<AppResult<void>> startRecording(RecordConfig config) async {

@@ -14,6 +14,9 @@ dependencies:
     path: ../desktop_screen_recorder_platform_interface
 
 dev_dependencies:
+  uni_lints:
+    git:
+      url: https://github.com/kwikwicommon/uni_lints.git
   flutter_test:
     sdk: flutter
 

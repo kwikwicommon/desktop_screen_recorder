@@ -10,9 +10,8 @@ environment:
 dependencies:
   flutter:
     sdk: flutter
-  get: ^4.7.3
   path: ^1.9.1
-  path_provider: ^2.1.5
+  path_provider: ^2.1.6
   desktop_screen_recorder_platform_interface:
     git:
       url: https://github.com/kwikwicommon/desktop_screen_recorder.git
@@ -30,6 +29,9 @@ dependencies:
       path: desktop_screen_recorder_windows
 
 dev_dependencies:
+  uni_lints:
+    git:
+      url: https://github.com/kwikwicommon/uni_lints.git
   flutter_test:
     sdk: flutter
 

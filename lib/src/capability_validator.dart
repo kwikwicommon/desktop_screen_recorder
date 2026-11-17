@@ -51,7 +51,8 @@ class RecordingCapabilityValidator {
     if (availability == null) {
       return AppFailure(
         code: AppFailureCode.unsupported,
-        message: '${requirement.label} requires '
+        message:
+            '${requirement.label} requires '
             '${messages.featureName(requirement.feature)}, but the native '
             'bridge did not report it.',
         recoverySuggestion: messages.checkPlatformChannelContract,
@@ -107,18 +108,18 @@ class RecordingCapabilityValidator {
     return [
       switch (config.mode) {
         RecordMode.fullscreen => const _RecordingFeatureRequirement(
-            feature: DesktopFeatureKey.recordDisplay,
-            label: 'Display recording',
-          ),
+          feature: DesktopFeatureKey.recordDisplay,
+          label: 'Display recording',
+        ),
         RecordMode.region => const _RecordingFeatureRequirement(
-            feature: DesktopFeatureKey.recordRegion,
-            label: 'Region recording',
-          ),
+          feature: DesktopFeatureKey.recordRegion,
+          label: 'Region recording',
+        ),
         RecordMode.window => const _RecordingFeatureRequirement(
-            feature: DesktopFeatureKey.recordWindow,
-            label: 'Window recording',
-            allowDegraded: false,
-          ),
+          feature: DesktopFeatureKey.recordWindow,
+          label: 'Window recording',
+          allowDegraded: false,
+        ),
       },
       if (config.captureAudio)
         const _RecordingFeatureRequirement(

@@ -45,10 +45,7 @@ class _FakePlatform extends DesktopScreenRecorderPlatform {
   final DesktopCapabilitySnapshot snapshot;
   final bool throwOnQuery;
 
-  _FakePlatform(
-    this.snapshot, {
-    this.throwOnQuery = false,
-  });
+  _FakePlatform(this.snapshot, {this.throwOnQuery = false});
 
   @override
   Future<AppResult<DesktopCapabilitySnapshot>> queryCapabilities() async {

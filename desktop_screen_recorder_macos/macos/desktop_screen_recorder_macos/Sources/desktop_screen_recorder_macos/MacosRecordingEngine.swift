@@ -179,6 +179,100 @@ func recordingRectHasUsableSize(_ rect: CGRect?) -> Bool {
   return rect.width > 1 && rect.height > 1
 }
 
+struct RecordingDisplayGeometry {
+  let frame: CGRect
+  let logicalWidth: Int
+  let logicalHeight: Int
+
+  var fullDisplaySourceRect: CGRect {
+    CGRect(
+      x: 0,
+      y: 0,
+      width: max(2, logicalWidth),
+      height: max(2, logicalHeight)
+    )
+  }
+
+  var displayLocalLogicalBounds: CGRect {
+    CGRect(
+      x: 0,
+      y: 0,
+      width: max(0, frame.width),
+      height: max(0, frame.height)
+    )
+  }
+}
+
+struct RecordingRegionResolution {
+  let sourceRect: CGRect
+  let overlayFrame: CGRect
+}
+
+enum RecordingRegionCoordinateResolver {
+  static func resolve(
+    display: RecordingDisplayGeometry,
+    region: CGRect?,
+    hasDisplayId: Bool
+  ) throws -> RecordingRegionResolution {
+    guard let region, region.width > 0, region.height > 0 else {
+      return RecordingRegionResolution(
+        sourceRect: display.fullDisplaySourceRect,
+        overlayFrame: display.frame
+      )
+    }
+
+    if hasDisplayId {
+      return try displayLocalResolution(display: display, region: region)
+    }
+
+    return try virtualDesktopResolution(display: display, region: region)
+  }
+
+  private static func displayLocalResolution(
+    display: RecordingDisplayGeometry,
+    region: CGRect
+  ) throws -> RecordingRegionResolution {
+    let clippedRegion = try validClippedRegion(
+      region.intersection(display.displayLocalLogicalBounds)
+    )
+    return RecordingRegionResolution(
+      sourceRect: clippedRegion.integral,
+      overlayFrame: clippedRegion.offsetBy(
+        dx: display.frame.minX,
+        dy: display.frame.minY
+      )
+    )
+  }
+
+  private static func virtualDesktopResolution(
+    display: RecordingDisplayGeometry,
+    region: CGRect
+  ) throws -> RecordingRegionResolution {
+    let clippedRegion = try validClippedRegion(region.intersection(display.frame))
+    return RecordingRegionResolution(
+      sourceRect: CGRect(
+        x: clippedRegion.minX - display.frame.minX,
+        y: clippedRegion.minY - display.frame.minY,
+        width: clippedRegion.width,
+        height: clippedRegion.height
+      ).integral,
+      overlayFrame: clippedRegion
+    )
+  }
+
+  private static func validClippedRegion(_ region: CGRect) throws -> CGRect {
+    guard !region.isNull, region.width > 1, region.height > 1 else {
+      throw nativeError(
+        "The selected recording region is outside the target display.",
+        status: .invalidInput,
+        recoverySuggestion: "Select a region inside a visible display and try again.",
+        nativeCode: "regionOutsideDisplay"
+      )
+    }
+    return region
+  }
+}
+
 final class NativeRecordingBridge: NSObject {
   private var recorder: Any?
   private var isStarting = false
@@ -1156,31 +1250,31 @@ final class NativeScreenRecorder: NSObject, SCStreamOutput, SCStreamDelegate, @u
       return .window(window: window)
     }
 
-    let display = selectDisplay(
+    guard let display = selectDisplay(
       from: content.displays,
       displayId: config.displayId,
       region: config.region
-    )
-    let sourceRect = try resolvedSourceRect(display: display, region: config.region)
-    let overlayFrame: CGRect
-    if let region = config.region, region.width > 0, region.height > 0 {
-      let clippedRegion = region.intersection(display.frame)
-      guard !clippedRegion.isNull, clippedRegion.width > 1, clippedRegion.height > 1 else {
-        throw nativeError(
-          "The selected recording region is outside the target display.",
-          status: .invalidInput,
-          recoverySuggestion: "Select a region inside a visible display and try again.",
-          nativeCode: "regionOutsideDisplay"
-        )
-      }
-      overlayFrame = clippedRegion
-    } else {
-      overlayFrame = display.frame
+    ) else {
+      throw nativeError(
+        "The target recording display could not be resolved.",
+        status: .invalidInput,
+        recoverySuggestion: "Select an available display and try again.",
+        nativeCode: "displayUnavailable"
+      )
     }
+    let regionResolution = try RecordingRegionCoordinateResolver.resolve(
+      display: RecordingDisplayGeometry(
+        frame: display.frame,
+        logicalWidth: display.width,
+        logicalHeight: display.height
+      ),
+      region: config.region,
+      hasDisplayId: config.displayId != nil
+    )
     return .display(
       display: display,
-      sourceRect: sourceRect,
-      overlayFrame: overlayFrame
+      sourceRect: regionResolution.sourceRect,
+      overlayFrame: regionResolution.overlayFrame
     )
   }
 
@@ -1188,10 +1282,9 @@ final class NativeScreenRecorder: NSObject, SCStreamOutput, SCStreamDelegate, @u
     from displays: [SCDisplay],
     displayId: Int?,
     region: CGRect?
-  ) -> SCDisplay {
-    if let displayId,
-       let display = displays.first(where: { Int($0.displayID) == displayId }) {
-      return display
+  ) -> SCDisplay? {
+    if let displayId {
+      return displays.first(where: { Int($0.displayID) == displayId })
     }
 
     if let region {
@@ -1202,7 +1295,7 @@ final class NativeScreenRecorder: NSObject, SCStreamOutput, SCStreamDelegate, @u
     }
 
     let mainDisplayId = CGMainDisplayID()
-    return displays.first(where: { $0.displayID == mainDisplayId }) ?? displays[0]
+    return displays.first(where: { $0.displayID == mainDisplayId }) ?? displays.first
   }
 
   private func makeStreamConfiguration(
@@ -1242,30 +1335,6 @@ final class NativeScreenRecorder: NSObject, SCStreamOutput, SCStreamDelegate, @u
     }
 
     return streamConfiguration
-  }
-
-  private func resolvedSourceRect(display: SCDisplay, region: CGRect?) throws -> CGRect {
-    guard let region, region.width > 0, region.height > 0 else {
-      return CGRect(x: 0, y: 0, width: display.width, height: display.height)
-    }
-
-    let displayFrame = display.frame
-    let clippedRegion = region.intersection(displayFrame)
-    guard !clippedRegion.isNull, clippedRegion.width > 1, clippedRegion.height > 1 else {
-      throw nativeError(
-        "The selected recording region is outside the target display.",
-        status: .invalidInput,
-        recoverySuggestion: "Select a region inside a visible display and try again.",
-        nativeCode: "regionOutsideDisplay"
-      )
-    }
-    let normalized = CGRect(
-      x: clippedRegion.minX - displayFrame.minX,
-      y: clippedRegion.minY - displayFrame.minY,
-      width: clippedRegion.width,
-      height: clippedRegion.height
-    )
-    return normalized.integral
   }
 
   private func scaledOutputSize(sourceRect: CGRect, maxHeight: Int) -> CGSize {

@@ -1,7 +1,6 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
-import 'package:get/get.dart';
 
 import 'models.dart';
 
@@ -44,12 +43,26 @@ class RecordState {
   }
 }
 
-class RecordController extends GetxController {
-  final status = RecordStatus.idle.obs;
-  final config = const RecordConfig().obs;
-  final duration = Duration.zero.obs;
-  final lastResult = Rxn<RecordResult>();
-  final errorMessage = RxnString();
+class RecordController extends ChangeNotifier {
+  RecordController() {
+    for (final value in _values) {
+      value.addListener(notifyListeners);
+    }
+  }
+
+  late final List<ChangeNotifier> _values = [
+    status,
+    config,
+    duration,
+    lastResult,
+    errorMessage,
+  ];
+
+  final status = ValueNotifier(RecordStatus.idle);
+  final config = ValueNotifier(const RecordConfig());
+  final duration = ValueNotifier(Duration.zero);
+  final lastResult = ValueNotifier<RecordResult?>(null);
+  final errorMessage = ValueNotifier<String?>(null);
 
   Timer? _durationTimer;
 
@@ -58,9 +71,13 @@ class RecordController extends GetxController {
       status.value == RecordStatus.paused;
 
   @override
-  void onClose() {
+  void dispose() {
     _durationTimer?.cancel();
-    super.onClose();
+
+    for (final value in _values) {
+      value.dispose();
+    }
+    super.dispose();
   }
 
   void updateConfig(RecordConfig newConfig) {
@@ -119,9 +136,7 @@ class RecordController extends GetxController {
   }
 
   void toggleShowCursor() {
-    config.value = config.value.copyWith(
-      showCursor: !config.value.showCursor,
-    );
+    config.value = config.value.copyWith(showCursor: !config.value.showCursor);
   }
 
   void toggleHighlightClicks() {
@@ -146,10 +161,7 @@ class RecordController extends GetxController {
   }
 
   void clearRegion() {
-    config.value = config.value.copyWith(
-      clearRegion: true,
-      clearDisplay: true,
-    );
+    config.value = config.value.copyWith(clearRegion: true, clearDisplay: true);
   }
 
   void setWindowTarget({required int windowId, required String title}) {
@@ -250,10 +262,7 @@ class RecordController extends GetxController {
     }
     if (next.format == RecordFormat.gif &&
         (next.captureAudio || next.captureMicrophone)) {
-      next = next.copyWith(
-        captureAudio: false,
-        captureMicrophone: false,
-      );
+      next = next.copyWith(captureAudio: false, captureMicrophone: false);
     }
     switch (next.mode) {
       case RecordMode.region:

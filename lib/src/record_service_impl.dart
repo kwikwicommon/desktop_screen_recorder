@@ -433,7 +433,8 @@ class RecordServiceImpl implements RecordService {
   void dispose() {
     final activeOperation = _activeOperation;
     final activeOperationDone = _activeOperationDone?.future;
-    final shouldStopNative = _stateTracker.isRecording &&
+    final shouldStopNative =
+        _stateTracker.isRecording &&
         activeOperation != _RecordingOperation.stop;
     _isDisposed = true;
     if (shouldStopNative) {

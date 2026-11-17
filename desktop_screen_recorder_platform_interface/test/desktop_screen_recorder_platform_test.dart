@@ -1,4 +1,3 @@
-import 'dart:typed_data';
 
 import 'package:desktop_screen_recorder_platform_interface/desktop_screen_recorder_platform_interface.dart';
 import 'package:flutter/services.dart';

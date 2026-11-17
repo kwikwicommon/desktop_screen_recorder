@@ -9,9 +9,7 @@ void main() {
       return;
     }
 
-    final service = DesktopCleanupService(
-      storage: MemoryCleanupStateStorage(),
-    );
+    final service = DesktopCleanupService(storage: MemoryCleanupStateStorage());
     final controller = service.createController(
       jobId: 'desktop-cleanup-integration',
       hideDesktopIcons: true,

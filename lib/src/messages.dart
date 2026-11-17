@@ -1,2 +1,5 @@
 export 'package:desktop_screen_recorder_platform_interface/desktop_screen_recorder_platform_interface.dart'
-    show DesktopPlatformResolver, RecordErrorMessages, defaultRecordErrorMessages;
+    show
+        DesktopPlatformResolver,
+        RecordErrorMessages,
+        defaultRecordErrorMessages;

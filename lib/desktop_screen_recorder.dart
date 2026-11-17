@@ -1,4 +1,4 @@
-library desktop_screen_recorder;
+library;
 
 import 'package:desktop_screen_recorder_platform_interface/desktop_screen_recorder_platform_interface.dart'
     show
@@ -127,8 +127,7 @@ class DesktopScreenRecorder implements RecordService {
   @override
   Future<AppResult<DesktopPermissionInfo>> requestPermission(
     DesktopPermissionType type,
-  ) =>
-      _service.requestPermission(type);
+  ) => _service.requestPermission(type);
 
   @override
   void dispose() {

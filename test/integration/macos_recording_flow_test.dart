@@ -10,10 +10,7 @@ void main() {
       isSupportedPlatform: () => true,
     );
 
-    expect(
-      (await service.start(const RecordConfig())).isSuccess,
-      isTrue,
-    );
+    expect((await service.start(const RecordConfig())).isSuccess, isTrue);
     expect((await service.pause()).isSuccess, isTrue);
     expect((await service.resume()).isSuccess, isTrue);
 

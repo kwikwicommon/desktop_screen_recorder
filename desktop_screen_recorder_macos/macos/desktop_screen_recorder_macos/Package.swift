@@ -19,6 +19,10 @@ let package = Package(
             dependencies: [
                 .product(name: "FlutterFramework", package: "FlutterFramework")
             ]
+        ),
+        .testTarget(
+            name: "desktop_screen_recorder_macosTests",
+            dependencies: ["desktop_screen_recorder_macos"]
         )
     ]
 )
